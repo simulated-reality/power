@@ -1,4 +1,4 @@
-// Package power provides algorithms for simulating the power dissipation of
+// Package power provides algorithms for simulating the power consumption of
 // applications running on multiprocessor platforms.
 package power
 
@@ -89,7 +89,7 @@ func (p *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 
 }
 
 // Progress returns a function func(time float64, power []float64) that computes
-// the power dissipation at an arbitrary time moment according to a schedule.
+// the power consumption at an arbitrary time moment according to a schedule.
 func (p *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
 	cores, tasks := p.platform.Cores, p.application.Tasks
 	nc, nt := uint(len(cores)), uint(len(tasks))
