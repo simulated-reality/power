@@ -1,6 +1,6 @@
 # Power [![Build Status][travis-img]][travis-url]
 
-The package provides algorithms for simulating the power consumption of
+The package provides algorithms for distributing power consumption of
 applications running on multiprocessor platforms.
 
 ## [Documentation][doc]
