@@ -4,8 +4,8 @@ package power
 
 import (
 	"github.com/ready-steady/sort"
-	"github.com/simulated-reality/system"
-	"github.com/simulated-reality/time"
+	"github.com/turing-complete/system"
+	"github.com/turing-complete/time"
 )
 
 // Power represents a power simulator configured for a particular system.

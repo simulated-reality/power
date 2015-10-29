@@ -11,6 +11,6 @@ applications running on multiprocessor platforms.
 2. Implement your idea.
 3. Open a pull request.
 
-[travis-img]: https://travis-ci.org/simulated-reality/power.svg
-[travis-url]: https://travis-ci.org/simulated-reality/power
-[doc]: http://godoc.org/github.com/simulated-reality/power
+[travis-img]: https://travis-ci.org/turing-complete/power.svg
+[travis-url]: https://travis-ci.org/turing-complete/power
+[doc]: http://godoc.org/github.com/turing-complete/power

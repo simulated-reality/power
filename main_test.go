@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/ready-steady/assert"
-	"github.com/simulated-reality/system"
-	"github.com/simulated-reality/time"
+	"github.com/turing-complete/system"
+	"github.com/turing-complete/time"
 )
 
 func TestPartition(t *testing.T) {
