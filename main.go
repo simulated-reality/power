@@ -23,13 +23,10 @@ func New(platform *system.Platform, application *system.Application) *Power {
 // mapping imposed by a schedule.
 func (self *Power) Distribute(schedule *time.Schedule) []float64 {
 	cores, tasks := self.platform.Cores, self.application.Tasks
-	nt := uint(len(tasks))
-
-	power := make([]float64, nt)
-	for i := uint(0); i < nt; i++ {
-		power[i] = cores[schedule.Mapping[i]].Power[tasks[i].Type]
+	power := make([]float64, self.application.Len())
+	for i, j := range schedule.Mapping {
+		power[i] = cores[j].Power[tasks[i].Type]
 	}
-
 	return power
 }
 
