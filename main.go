@@ -26,35 +26,9 @@ func (p *Power) Partition(schedule *time.Schedule, points []float64,
 	return Partition(p.collect(schedule), schedule, points, ε)
 }
 
-// Sample computes a power profile with respect to a sampling interval Δt. The
-// required number of samples is specified by ns; short schedules are extended
-// while long ones are truncated.
+// Sample does what the standalone Sample function does.
 func (p *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
-	cores, tasks := p.platform.Cores, p.application.Tasks
-	nc, nt := uint(len(cores)), uint(len(tasks))
-
-	P := make([]float64, nc*ns)
-
-	if count := uint(schedule.Span / Δt); count < ns {
-		ns = count
-	}
-
-	for i := uint(0); i < nt; i++ {
-		j := schedule.Mapping[i]
-		p := cores[j].Power[tasks[i].Type]
-
-		s := uint(schedule.Start[i]/Δt + 0.5)
-		f := uint(schedule.Finish[i]/Δt + 0.5)
-		if f > ns {
-			f = ns
-		}
-
-		for ; s < f; s++ {
-			P[s*nc+j] = p
-		}
-	}
-
-	return P
+	return Sample(p.collect(schedule), schedule, Δt, ns)
 }
 
 // Progress returns a function func(time float64, power []float64) that computes
@@ -132,6 +106,36 @@ func Partition(power []float64, schedule *time.Schedule, points []float64,
 	}
 
 	return P, ΔT, psteps
+}
+
+// Sample computes a power profile with respect to a sampling interval Δt. The
+// required number of samples is specified by ns; short schedules are extended
+// while long ones are truncated.
+func Sample(power []float64, schedule *time.Schedule, Δt float64, ns uint) []float64 {
+	nc, nt := schedule.Cores, schedule.Tasks
+
+	P := make([]float64, nc*ns)
+
+	if count := uint(schedule.Span / Δt); count < ns {
+		ns = count
+	}
+
+	for i := uint(0); i < nt; i++ {
+		j := schedule.Mapping[i]
+		p := power[i]
+
+		s := uint(schedule.Start[i]/Δt + 0.5)
+		f := uint(schedule.Finish[i]/Δt + 0.5)
+		if f > ns {
+			f = ns
+		}
+
+		for ; s < f; s++ {
+			P[s*nc+j] = p
+		}
+	}
+
+	return P
 }
 
 func traverse(points []float64, ε float64) ([]float64, []uint) {
