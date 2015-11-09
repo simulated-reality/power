@@ -20,24 +20,24 @@ func New(platform *system.Platform, application *system.Application) *Power {
 }
 
 // Partition does what the standalone Partition function does.
-func (p *Power) Partition(schedule *time.Schedule, points []float64,
+func (self *Power) Partition(schedule *time.Schedule, points []float64,
 	ε float64) ([]float64, []float64, []uint) {
 
-	return Partition(p.collect(schedule), schedule, points, ε)
+	return Partition(self.collect(schedule), schedule, points, ε)
 }
 
 // Sample does what the standalone Sample function does.
-func (p *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
-	return Sample(p.collect(schedule), schedule, Δt, ns)
+func (self *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
+	return Sample(self.collect(schedule), schedule, Δt, ns)
 }
 
 // Sample does what the standalone Progress function does.
-func (p *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
-	return Progress(p.collect(schedule), schedule)
+func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
+	return Progress(self.collect(schedule), schedule)
 }
 
-func (p *Power) collect(schedule *time.Schedule) []float64 {
-	cores, tasks := p.platform.Cores, p.application.Tasks
+func (self *Power) collect(schedule *time.Schedule) []float64 {
+	cores, tasks := self.platform.Cores, self.application.Tasks
 	nt := uint(len(tasks))
 
 	power := make([]float64, nt)
