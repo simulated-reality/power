@@ -31,35 +31,9 @@ func (p *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 
 	return Sample(p.collect(schedule), schedule, Δt, ns)
 }
 
-// Progress returns a function func(time float64, power []float64) that computes
-// the power consumption at an arbitrary time moment according to a schedule.
+// Sample does what the standalone Progress function does.
 func (p *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
-	cores, tasks := p.platform.Cores, p.application.Tasks
-	nc, nt := uint(len(cores)), uint(len(tasks))
-
-	mapping := make([][]uint, nc)
-	for i := uint(0); i < nc; i++ {
-		mapping[i] = make([]uint, 0, nt)
-		for j := uint(0); j < nt; j++ {
-			if i == schedule.Mapping[j] {
-				mapping[i] = append(mapping[i], j)
-			}
-		}
-	}
-
-	start, finish := schedule.Start, schedule.Finish
-
-	return func(time float64, power []float64) {
-		for i := uint(0); i < nc; i++ {
-			power[i] = 0
-			for _, j := range mapping[i] {
-				if start[j] <= time && time <= finish[j] {
-					power[i] = cores[i].Power[tasks[j].Type]
-					break
-				}
-			}
-		}
-	}
+	return Progress(p.collect(schedule), schedule)
 }
 
 func (p *Power) collect(schedule *time.Schedule) []float64 {
@@ -106,6 +80,36 @@ func Partition(power []float64, schedule *time.Schedule, points []float64,
 	}
 
 	return P, ΔT, psteps
+}
+
+// Progress returns a function func(time float64, power []float64) that computes
+// the power consumption at an arbitrary time moment according to a schedule.
+func Progress(power []float64, schedule *time.Schedule) func(float64, []float64) {
+	nc, nt := schedule.Cores, schedule.Tasks
+
+	mapping := make([][]uint, nc)
+	for i := uint(0); i < nc; i++ {
+		mapping[i] = make([]uint, 0, nt)
+		for j := uint(0); j < nt; j++ {
+			if i == schedule.Mapping[j] {
+				mapping[i] = append(mapping[i], j)
+			}
+		}
+	}
+
+	start, finish := schedule.Start, schedule.Finish
+
+	return func(time float64, result []float64) {
+		for i := uint(0); i < nc; i++ {
+			result[i] = 0
+			for _, j := range mapping[i] {
+				if start[j] <= time && time <= finish[j] {
+					result[i] = power[j]
+					break
+				}
+			}
+		}
+	}
 }
 
 // Sample computes a power profile with respect to a sampling interval Δt. The
