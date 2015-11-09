@@ -19,24 +19,9 @@ func New(platform *system.Platform, application *system.Application) *Power {
 	return &Power{platform: platform, application: application}
 }
 
-// Partition does what the standalone Partition function does.
-func (self *Power) Partition(schedule *time.Schedule, points []float64,
-	ε float64) ([]float64, []float64, []uint) {
-
-	return Partition(self.collect(schedule), schedule, points, ε)
-}
-
-// Sample does what the standalone Sample function does.
-func (self *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
-	return Sample(self.collect(schedule), schedule, Δt, ns)
-}
-
-// Sample does what the standalone Progress function does.
-func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
-	return Progress(self.collect(schedule), schedule)
-}
-
-func (self *Power) collect(schedule *time.Schedule) []float64 {
+// Collect returns the power consumption of the tasks with respect to the
+// mapping imposed by a schedule.
+func (self *Power) Collect(schedule *time.Schedule) []float64 {
 	cores, tasks := self.platform.Cores, self.application.Tasks
 	nt := uint(len(tasks))
 
@@ -46,6 +31,23 @@ func (self *Power) collect(schedule *time.Schedule) []float64 {
 	}
 
 	return power
+}
+
+// Partition does what the standalone Partition function does.
+func (self *Power) Partition(schedule *time.Schedule, points []float64,
+	ε float64) ([]float64, []float64, []uint) {
+
+	return Partition(self.Collect(schedule), schedule, points, ε)
+}
+
+// Sample does what the standalone Sample function does.
+func (self *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
+	return Sample(self.Collect(schedule), schedule, Δt, ns)
+}
+
+// Sample does what the standalone Progress function does.
+func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
+	return Progress(self.Collect(schedule), schedule)
 }
 
 // Partition computes a power profile with a variable time step dictated by the
