@@ -16,45 +16,14 @@ type Power struct {
 
 // New returns a power distributor for a platform and an application.
 func New(platform *system.Platform, application *system.Application) *Power {
-	return &Power{
-		platform:    platform,
-		application: application,
-	}
+	return &Power{platform: platform, application: application}
 }
 
-// Partition computes a power profile with a variable time step dictated by the
-// time moments of power switches (the start and finish times of the tasks) and
-// a number of additional time moments gathered in points.
+// Partition does what the standalone Partition function does.
 func (p *Power) Partition(schedule *time.Schedule, points []float64,
 	ε float64) ([]float64, []float64, []uint) {
 
-	cores, tasks := p.platform.Cores, p.application.Tasks
-	nc, nt, np := uint(len(cores)), uint(len(tasks)), uint(len(points))
-
-	time := make([]float64, 2*nt+np)
-	copy(time[:nt], schedule.Start)
-	copy(time[nt:], schedule.Finish)
-	copy(time[2*nt:], points)
-
-	ΔT, steps := traverse(time, ε)
-	ssteps, fsteps, psteps := steps[:nt], steps[nt:2*nt], steps[2*nt:]
-
-	ns := uint(len(ΔT))
-
-	P := make([]float64, nc*ns)
-
-	for i := uint(0); i < nt; i++ {
-		j := schedule.Mapping[i]
-		p := cores[j].Power[tasks[i].Type]
-
-		s, f := ssteps[i], fsteps[i]
-
-		for ; s < f; s++ {
-			P[s*nc+j] = p
-		}
-	}
-
-	return P, ΔT, psteps
+	return Partition(p.collect(schedule), schedule, points, ε)
 }
 
 // Sample computes a power profile with respect to a sampling interval Δt. The
@@ -117,6 +86,52 @@ func (p *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
 			}
 		}
 	}
+}
+
+func (p *Power) collect(schedule *time.Schedule) []float64 {
+	cores, tasks := p.platform.Cores, p.application.Tasks
+	nt := uint(len(tasks))
+
+	power := make([]float64, nt)
+	for i := uint(0); i < nt; i++ {
+		power[i] = cores[schedule.Mapping[i]].Power[tasks[i].Type]
+	}
+
+	return power
+}
+
+// Partition computes a power profile with a variable time step dictated by the
+// time moments of power switches (the start and finish times of the tasks) and
+// a number of additional time moments gathered in points.
+func Partition(power []float64, schedule *time.Schedule, points []float64,
+	ε float64) ([]float64, []float64, []uint) {
+
+	nc, nt, np := schedule.Cores, schedule.Tasks, uint(len(points))
+
+	time := make([]float64, 2*nt+np)
+	copy(time[:nt], schedule.Start)
+	copy(time[nt:], schedule.Finish)
+	copy(time[2*nt:], points)
+
+	ΔT, steps := traverse(time, ε)
+	ssteps, fsteps, psteps := steps[:nt], steps[nt:2*nt], steps[2*nt:]
+
+	ns := uint(len(ΔT))
+
+	P := make([]float64, nc*ns)
+
+	for i := uint(0); i < nt; i++ {
+		j := schedule.Mapping[i]
+		p := power[i]
+
+		s, f := ssteps[i], fsteps[i]
+
+		for ; s < f; s++ {
+			P[s*nc+j] = p
+		}
+	}
+
+	return P, ΔT, psteps
 }
 
 func traverse(points []float64, ε float64) ([]float64, []uint) {
