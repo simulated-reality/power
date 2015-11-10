@@ -18,23 +18,10 @@ func TestPartition(t *testing.T) {
 
 	power, schedule := prepare("002_040")
 
-	points := make([]float64, n)
-	for i := range points {
-		points[i] = float64(i+1) * schedule.Span / n
-	}
-	P, ΔT, steps := power.Partition(schedule, points, ε)
+	P, ΔT := power.Partition(schedule, ε)
 
 	assert.Equal(P, fixturePartition.P, t)
 	assert.EqualWithin(ΔT, fixturePartition.ΔT, 1e-15, t)
-	assert.Equal(steps, fixturePartition.steps, t)
-
-	Σ := 0.0
-	for i, j := uint(0), uint(0); i < n; i++ {
-		for ; j < steps[i]; j++ {
-			Σ += ΔT[j]
-		}
-		assert.EqualWithin(Σ, points[i], 1e-15, t)
-	}
 }
 
 func TestProgress(t *testing.T) {

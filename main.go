@@ -31,10 +31,8 @@ func (self *Power) Distribute(schedule *time.Schedule) []float64 {
 }
 
 // Partition does what the standalone Partition function does.
-func (self *Power) Partition(schedule *time.Schedule, points []float64,
-	ε float64) ([]float64, []float64, []uint) {
-
-	return Partition(self.Distribute(schedule), schedule, points, ε)
+func (self *Power) Partition(schedule *time.Schedule, ε float64) ([]float64, []float64) {
+	return Partition(self.Distribute(schedule), schedule, ε)
 }
 
 // Sample does what the standalone Sample function does.
@@ -48,20 +46,16 @@ func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
 }
 
 // Partition computes a power profile with a variable time step dictated by the
-// time moments of power switches (the start and finish times of the tasks) and
-// a number of additional time moments gathered in points.
-func Partition(power []float64, schedule *time.Schedule, points []float64,
-	ε float64) ([]float64, []float64, []uint) {
+// time moments of power switches (the start and finish times of the tasks).
+func Partition(power []float64, schedule *time.Schedule, ε float64) ([]float64, []float64) {
+	nc, nt := schedule.Cores, schedule.Tasks
 
-	nc, nt, np := schedule.Cores, schedule.Tasks, uint(len(points))
-
-	time := make([]float64, 2*nt+np)
+	time := make([]float64, 2*nt)
 	copy(time[:nt], schedule.Start)
 	copy(time[nt:], schedule.Finish)
-	copy(time[2*nt:], points)
 
 	ΔT, steps := traverse(time, ε)
-	ssteps, fsteps, psteps := steps[:nt], steps[nt:2*nt], steps[2*nt:]
+	ssteps, fsteps := steps[:nt], steps[nt:2*nt]
 
 	ns := uint(len(ΔT))
 
@@ -78,7 +72,7 @@ func Partition(power []float64, schedule *time.Schedule, points []float64,
 		}
 	}
 
-	return P, ΔT, psteps
+	return P, ΔT
 }
 
 // Progress returns a function func(time float64, power []float64) that computes
