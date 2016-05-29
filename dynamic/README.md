@@ -5,4 +5,4 @@ applications running on multiprocessor platforms.
 
 ## [Documentation][doc]
 
-[doc]: http://godoc.org/github.com/turing-complete/power
+[doc]: http://godoc.org/github.com/turing-complete/power/dynamic
