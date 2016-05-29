@@ -1,4 +1,4 @@
-package power
+package dynamic
 
 import (
 	"fmt"
@@ -17,7 +17,6 @@ func TestPartition(t *testing.T) {
 	)
 
 	power, schedule := prepare("002_040")
-
 	P, ΔT := power.Partition(schedule, ε)
 
 	assert.Equal(P, fixturePartition.P, t)
@@ -31,7 +30,6 @@ func TestProgress(t *testing.T) {
 
 	power, schedule := prepare("002_040")
 	nc, ns := uint(2), uint(schedule.Span/Δt)
-
 	progress := power.Progress(schedule)
 
 	P := make([]float64, ns*nc)
@@ -98,15 +96,12 @@ func BenchmarkSample(b *testing.B) {
 	}
 }
 
-func prepare(name string) (*Dynamic, *time.Schedule) {
+func prepare(name string) (*Power, *time.Schedule) {
 	platform, application, _ := system.Load(findFixture(fmt.Sprintf("%s.tgff", name)))
-
-	power := NewDynamic(platform, application)
-
+	power := New(platform, application)
 	profile := system.NewProfile(platform, application)
 	list := time.NewList(platform, application)
 	schedule := list.Compute(profile.Mobility)
-
 	return power, schedule
 }
 

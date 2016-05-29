@@ -1,4 +1,6 @@
-package power
+// Package dynamic provides algorithms for calculating the dynamic power of
+// applications running on multiprocessor platforms.
+package dynamic
 
 import (
 	"github.com/ready-steady/sort"
@@ -6,20 +8,20 @@ import (
 	"github.com/turing-complete/time"
 )
 
-// Dynamic is a dynamic-power manager.
-type Dynamic struct {
+// Power is a power calculator.
+type Power struct {
 	platform    *system.Platform
 	application *system.Application
 }
 
-// NewDynamic returns a power manager.
-func NewDynamic(platform *system.Platform, application *system.Application) *Dynamic {
-	return &Dynamic{platform: platform, application: application}
+// New returns a power calculator.
+func New(platform *system.Platform, application *system.Application) *Power {
+	return &Power{platform: platform, application: application}
 }
 
 // Distribute returns the power consumption of the tasks with respect to the
 // mapping imposed by a schedule.
-func (self *Dynamic) Distribute(schedule *time.Schedule) []float64 {
+func (self *Power) Distribute(schedule *time.Schedule) []float64 {
 	cores, tasks := self.platform.Cores, self.application.Tasks
 	power := make([]float64, self.application.Len())
 	for i, j := range schedule.Mapping {
@@ -29,22 +31,22 @@ func (self *Dynamic) Distribute(schedule *time.Schedule) []float64 {
 }
 
 // Partition does what the standalone Partition function does.
-func (self *Dynamic) Partition(schedule *time.Schedule, ε float64) ([]float64, []float64) {
+func (self *Power) Partition(schedule *time.Schedule, ε float64) ([]float64, []float64) {
 	return Partition(self.Distribute(schedule), schedule, ε)
 }
 
 // Sample does what the standalone Sample function does.
-func (self *Dynamic) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
+func (self *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
 	return Sample(self.Distribute(schedule), schedule, Δt, ns)
 }
 
 // Progress does what the standalone Progress function does.
-func (self *Dynamic) Progress(schedule *time.Schedule) func(float64, []float64) {
+func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
 	return Progress(self.Distribute(schedule), schedule)
 }
 
-// Partition computes a dynamic power profile with a variable time step dictated
-// by the time moments of power switches.
+// Partition computes a power profile with a variable time step dictated by the
+// time moments of power switches.
 func Partition(power []float64, schedule *time.Schedule, ε float64) ([]float64, []float64) {
 	nc, nt := schedule.Cores, schedule.Tasks
 
@@ -73,8 +75,8 @@ func Partition(power []float64, schedule *time.Schedule, ε float64) ([]float64,
 	return P, ΔT
 }
 
-// Progress returns a function func(time float64, power []float64) that computes
-// the dynamic power at an arbitrary time moment according to a schedule.
+// Progress returns a function that computes the power consumption at an
+// arbitrary time moment according to a schedule.
 func Progress(power []float64, schedule *time.Schedule) func(float64, []float64) {
 	nc, nt := schedule.Cores, schedule.Tasks
 
@@ -103,9 +105,9 @@ func Progress(power []float64, schedule *time.Schedule) func(float64, []float64)
 	}
 }
 
-// Sample computes a dynamic power profile with respect to a sampling interval
-// Δt. The required number of samples is specified by ns; short schedules are
-// extended while long ones are truncated.
+// Sample computes a power profile with respect to a sampling interval Δt. The
+// required number of samples is specified by ns; short schedules are extended
+// while long ones are truncated.
 func Sample(power []float64, schedule *time.Schedule, Δt float64, ns uint) []float64 {
 	nc, nt := schedule.Cores, schedule.Tasks
 

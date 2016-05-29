@@ -1,4 +1,4 @@
-package power
+package dynamic
 
 type fixture struct {
 	P     []float64
