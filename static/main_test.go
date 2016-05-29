@@ -1,4 +1,4 @@
-package leakage
+package static
 
 import (
 	"testing"

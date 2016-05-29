@@ -1,5 +1,5 @@
-// Package leakage provides algorithms for calculating the leakage power.
-package leakage
+// Package static provides algorithms for calculating the static power.
+package static
 
 import (
 	"github.com/ready-steady/statistics/regression"
