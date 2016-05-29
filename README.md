@@ -2,7 +2,8 @@
 
 The repository hosts the following packages:
 
-* [dynamic](dynamic).
+* [dynamic](dynamic) and
+* [leakage](leakage).
 
 ## Contribution
 

@@ -1,5 +1,4 @@
-// Package dynamic provides algorithms for calculating the dynamic power of
-// applications running on multiprocessor platforms.
+// Package dynamic provides algorithms for calculating the dynamic power.
 package dynamic
 
 import (

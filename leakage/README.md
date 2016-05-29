@@ -1,6 +1,6 @@
-# Dynamic
+# Leakage
 
-The package provides algorithms for calculating the dynamic power.
+The package provides algorithms for calculating the leakage power.
 
 ## [Documentation][doc]
 
