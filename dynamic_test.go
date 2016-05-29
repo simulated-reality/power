@@ -98,10 +98,10 @@ func BenchmarkSample(b *testing.B) {
 	}
 }
 
-func prepare(name string) (*Power, *time.Schedule) {
+func prepare(name string) (*Dynamic, *time.Schedule) {
 	platform, application, _ := system.Load(findFixture(fmt.Sprintf("%s.tgff", name)))
 
-	power := New(platform, application)
+	power := NewDynamic(platform, application)
 
 	profile := system.NewProfile(platform, application)
 	list := time.NewList(platform, application)
