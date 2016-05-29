@@ -2,8 +2,7 @@
 
 The repository hosts the following packages:
 
-* [analytic](analytic) and
-* [numeric](numeric).
+* [dynamic](dynamic).
 
 ## Contribution
 
