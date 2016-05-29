@@ -18,8 +18,7 @@ func New(platform *system.Platform, application *system.Application) *Power {
 	return &Power{platform: platform, application: application}
 }
 
-// Distribute returns the power consumption of the tasks with respect to the
-// mapping imposed by a schedule.
+// Distribute returns the power consumption of the tasks.
 func (self *Power) Distribute(schedule *time.Schedule) []float64 {
 	cores, tasks := self.platform.Cores, self.application.Tasks
 	power := make([]float64, self.application.Len())
@@ -29,24 +28,27 @@ func (self *Power) Distribute(schedule *time.Schedule) []float64 {
 	return power
 }
 
-// Partition does what the standalone Partition function does.
-func (self *Power) Partition(schedule *time.Schedule, ε float64) ([]float64, []float64) {
-	return Partition(self.Distribute(schedule), schedule, ε)
-}
-
-// Sample does what the standalone Sample function does.
-func (self *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
-	return Sample(self.Distribute(schedule), schedule, Δt, ns)
-}
-
-// Progress does what the standalone Progress function does.
-func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
-	return Progress(self.Distribute(schedule), schedule)
-}
-
 // Partition computes a power profile with a variable time step dictated by the
 // time moments of power switches.
-func Partition(power []float64, schedule *time.Schedule, ε float64) ([]float64, []float64) {
+func (self *Power) Partition(schedule *time.Schedule, ε float64) ([]float64, []float64) {
+	return partition(self.Distribute(schedule), schedule, ε)
+}
+
+// Sample computes a power profile with respect to a sampling interval Δt.
+//
+// The required number of samples is specified by ns; short schedules are
+// extended while long ones are truncated.
+func (self *Power) Sample(schedule *time.Schedule, Δt float64, ns uint) []float64 {
+	return sample(self.Distribute(schedule), schedule, Δt, ns)
+}
+
+// Progress returns a function for computing the power consumption at an
+// arbitrary time moment.
+func (self *Power) Progress(schedule *time.Schedule) func(float64, []float64) {
+	return progress(self.Distribute(schedule), schedule)
+}
+
+func partition(power []float64, schedule *time.Schedule, ε float64) ([]float64, []float64) {
 	nc, nt := schedule.Cores, schedule.Tasks
 
 	time := make([]float64, 2*nt)
@@ -74,9 +76,7 @@ func Partition(power []float64, schedule *time.Schedule, ε float64) ([]float64,
 	return P, ΔT
 }
 
-// Progress returns a function that computes the power consumption at an
-// arbitrary time moment according to a schedule.
-func Progress(power []float64, schedule *time.Schedule) func(float64, []float64) {
+func progress(power []float64, schedule *time.Schedule) func(float64, []float64) {
 	nc, nt := schedule.Cores, schedule.Tasks
 
 	mapping := make([][]uint, nc)
@@ -104,10 +104,7 @@ func Progress(power []float64, schedule *time.Schedule) func(float64, []float64)
 	}
 }
 
-// Sample computes a power profile with respect to a sampling interval Δt. The
-// required number of samples is specified by ns; short schedules are extended
-// while long ones are truncated.
-func Sample(power []float64, schedule *time.Schedule, Δt float64, ns uint) []float64 {
+func sample(power []float64, schedule *time.Schedule, Δt float64, ns uint) []float64 {
 	nc, nt := schedule.Cores, schedule.Tasks
 
 	P := make([]float64, nc*ns)
