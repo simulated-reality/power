@@ -20,7 +20,7 @@ func TestPartition(t *testing.T) {
 	P, ΔT := power.Partition(schedule, ε)
 
 	assert.Equal(P, fixturePartition.P, t)
-	assert.EqualWithin(ΔT, fixturePartition.ΔT, 1e-15, t)
+	assert.Close(ΔT, fixturePartition.ΔT, 1e-15, t)
 }
 
 func TestProgress(t *testing.T) {

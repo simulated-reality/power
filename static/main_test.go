@@ -11,5 +11,5 @@ func TestCompute(t *testing.T) {
 	C := []float64{0.5460, 0.6304, 0.7326, 0.8550, 1.0000, 1.1711, 1.3734, 1.6067, 1.8737}
 	power := New(1.0, Q, C)
 
-	assert.EqualWithin(power.Compute(358.15), 1.088, 0.001, t)
+	assert.Close(power.Compute(358.15), 1.088, 0.001, t)
 }
